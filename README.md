@@ -1,6 +1,8 @@
 # project
 
-A new Flutter project.
+Button on top adds data to db.
+Button on middle useless.
+Button on bottom opens the BottomSheet.
 
 ## Getting Started
 
