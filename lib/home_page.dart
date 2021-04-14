@@ -8,19 +8,23 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Loc> _loclist = List<Loc>();
+  List<Loc> _loclist = [];
   var locationdbservice = LocationDBService();
   var location = Loc();
 
   @override
   void initState() {
-    setState(() {});
     getLocations();
     super.initState();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   getLocations() async {
-    _loclist = List<Loc>();
+    _loclist = [];
     var locations = await locationdbservice.readLocations();
     locations.forEach((location) {
       setState(() {
@@ -51,9 +55,7 @@ class _HomePageState extends State<HomePage> {
             location.note = "evet ipsum";
 
             var result = await locationdbservice.saveLocation(location);
-            setState(() {
-              initState();
-            });
+            setState(() {});
             print(result);
           },
           child: Ink(
@@ -140,37 +142,40 @@ class _HomePageState extends State<HomePage> {
     showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
-          return Container(
-              color: Colors.blue[600],
-              height: MediaQuery.of(context).size.height * .8,
-              child: ListView.builder(
-                  itemCount: _loclist.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                        padding: EdgeInsets.only(top: 8, left: 16, right: 16),
-                        child: Card(
-                          child: ListTile(
-                            leading: Text(_loclist[index].name),
-                            title: IconButton(
-                              icon: Icon(Icons.delete),
-                              onPressed: () async {
-                                var result = await locationdbservice
-                                    .deleteLocation(_loclist[index].id);
-                                setState(() {
-                                  this._loclist.removeAt(index);
-                                });
-
-                                if (result > 0) {
-                                  Toast.show("Silindi", context,
-                                      duration: Toast.LENGTH_SHORT,
-                                      gravity: Toast.BOTTOM);
-                                  getLocations();
-                                }
-                              },
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter mystate) {
+            return Container(
+                color: Colors.blue[600],
+                height: MediaQuery.of(context).size.height * .8,
+                child: ListView.builder(
+                    itemCount: _loclist.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                          padding: EdgeInsets.only(top: 8, left: 16, right: 16),
+                          child: Card(
+                            child: ListTile(
+                              leading: Text(_loclist[index].name),
+                              title: IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () async {
+                                  var result = await locationdbservice
+                                      .deleteLocation(_loclist[index].id);
+                                  mystate(() {
+                                    this._loclist.removeAt(index);
+                                  });
+                                  if (result > 0) {
+                                    Toast.show("Silindi", context,
+                                        duration: Toast.LENGTH_SHORT,
+                                        gravity: Toast.BOTTOM);
+                                    getLocations();
+                                  }
+                                  setState(() {});
+                                },
+                              ),
                             ),
-                          ),
-                        ));
-                  }));
+                          ));
+                    }));
+          });
         });
   }
 
