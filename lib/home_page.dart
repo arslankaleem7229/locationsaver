@@ -55,7 +55,9 @@ class _HomePageState extends State<HomePage> {
             location.note = "evet ipsum";
 
             var result = await locationdbservice.saveLocation(location);
-            setState(() {});
+            setState(() {
+              getLocations();
+            });
             print(result);
           },
           child: Ink(
